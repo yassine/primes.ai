@@ -1,0 +1,12 @@
+pluginManagement {
+  repositories {
+    maven { url = uri("https://plugins.gradle.org/m2/") }
+    mavenCentral()
+    jcenter()
+  }
+}
+
+rootProject.name = 'primes.ai'
+
+include(":primes-job")
+include(":primes-deployment")

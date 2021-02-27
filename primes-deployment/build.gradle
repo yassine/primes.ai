@@ -1,0 +1,42 @@
+plugins {
+  id("com.palantir.docker-compose") version '0.26.0'
+  id 'org.jetbrains.kotlin.jvm'
+}
+
+group 'io.yassine.assignments'
+version '0.1.0-SNAPSHOT'
+
+repositories {
+  mavenCentral()
+}
+
+dockerCompose {
+  setTemplate("./build/docker-compose.template.yml")
+  setDockerComposeFile("./build/docker-compose.yml")
+}
+
+sourceSets {
+  main {
+    resources {
+      srcDir("docker")
+    }
+    output.resourcesDir = "${buildDir}"
+  }
+}
+
+processResources {
+  filesMatching('**.template.yml') {
+    expand(
+      'primes_flink_redis_port': project.property('primes.flink.redis.port'),
+      'primes_flink_jobmanager_port': project.property('primes.flink.jobmanager.port'),
+    )
+  }
+}
+
+tasks.findByPath("generateDockerCompose").configure {
+  dependsOn("processResources")
+}
+
+tasks.findByPath("dockerComposeUp").configure {
+  dependsOn("generateDockerCompose")
+}

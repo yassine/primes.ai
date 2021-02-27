@@ -1,0 +1,44 @@
+version: "2.1"
+
+services:
+
+  primes-flink-redis:
+    container_name: primes-flink-redis
+    image: 'redis:6.2.0-alpine'
+    ports:
+      - "${primes_flink_redis_port}:6379"
+    command: redis-server
+    networks:
+      - primes-job-network
+
+  primes-flink-jobmanager:
+    container_name: primes-flink-jobmanager
+    image: 'flink:1.12.0-scala_2.11'
+    ports:
+      - "${primes_flink_jobmanager_port}:8081"
+    command: jobmanager
+    networks:
+      - primes-job-network
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: primes-flink-jobmanager
+
+  primes-flink-taskmanager:
+    container_name: primes-flink-taskmanager
+    image: 'flink:1.12.0-scala_2.11'
+    command: taskmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: primes-flink-jobmanager
+        taskmanager.numberOfTaskSlots: 2
+    depends_on:
+      - primes-flink-jobmanager
+    networks:
+      - primes-job-network
+
+networks:
+  primes-job-network:
+    name: primes-job-network
+    driver: bridge

@@ -1,0 +1,14 @@
+<configuration>
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <withJansi>true</withJansi>
+    <encoder>
+      <pattern>%date %highlight(%-5level) %magenta([%-4.30thread]) %cyan(%logger{30}:%-3line) - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="org.apache.beam.runners.flink" level="WARN" />
+
+  <root level="INFO">
+    <appender-ref ref="STDOUT" />
+  </root>
+</configuration>
