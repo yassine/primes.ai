@@ -5,7 +5,7 @@ import java.io.Serializable
 import java.util.*
 
 
-class AccState: Serializable {
+class AccState(private val threshold: Int): Serializable {
 
   var list: LinkedList<Int> = LinkedList<Int>()
   var state: Array<IntArray> = Array(10) {  IntArray(10) { 0 } }
@@ -16,10 +16,12 @@ class AccState: Serializable {
         for ( j in other.state[i].indices)
           state[i][j] += other.state[i][j]
       val combined = (list + other.list).toSet().toList().sorted()
-      if (combined.size > 1000) {
-        list = LinkedList(combined.subList(combined.size - 1000, combined.size))
-        combined.subList(0, combined.size - 1000)
+      if (combined.size > threshold) {
+        list = LinkedList(combined.subList(combined.size - threshold, combined.size))
+        combined.subList(0, combined.size - threshold)
           .forEach { reversePrimeEffect(state, it) }
+      } else {
+        list = LinkedList(combined)
       }
     }
     return this
@@ -54,10 +56,10 @@ class AccStateReducer(private val threshold: Int) : Combine.CombineFn<Int, AccSt
   }
 
   override fun createAccumulator(): AccState
-    = AccState()
+    = AccState(threshold)
 
   override fun mergeAccumulators(accumulators: MutableIterable<AccState>): AccState
-    = accumulators.fold(AccState()) { acc, cur -> cur.mergeWith(acc) }
+    = accumulators.fold(AccState(threshold)) { acc, cur -> cur.mergeWith(acc) }
 
   override fun extractOutput(accumulator: AccState): Array<IntArray>
     = accumulator.state
